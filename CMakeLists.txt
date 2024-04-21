@@ -5,16 +5,22 @@ project(mapf VERSION 0.0)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
+# Find Boost
+find_package(Boost REQUIRED COMPONENTS program_options system filesystem)
+
+# Find Eigen3 for PIBT
+find_package (Eigen3 3.4 REQUIRED NO_MODULE)
+
 if(NOT CMAKE_BUILD_TYPE)
     set(CMAKE_BUILD_TYPE "RELEASE") # other possible values: "DEBUG", "RELWITHDEBINFO", "MINSIZEREL"
 endif()
 
-set(CMAKE_CXX_FLAGS_DEBUG "-g -O0")
-set(CMAKE_CXX_FLAGS_RELEASE "-O3 -DNDEBUG")
+set(CMAKE_CXX_FLAGS_DEBUG "-g -O0)
+set(CMAKE_CXX_FLAGS_RELEASE "-O3 -DNDEBUG)
 
-include_directories("${CMAKE_SOURCE_DIR}/include")
+include_directories("${CMAKE_SOURCE_DIR}/include" "${CMAKE_SOURCE_DIR}/include/PIBT")
 
-file(GLOB SOURCES "${CMAKE_SOURCE_DIR}/include/*.h" "${CMAKE_SOURCE_DIR}/src/*.cpp")
+file(GLOB SOURCES "include/*.h" "src/*.cpp" "include/PIBT/*.h" "src/PIBT/*.cpp")
 add_library(mapf_lib SHARED ${SOURCES})
 
 add_subdirectory("${CMAKE_SOURCE_DIR}/lib/pybind11")

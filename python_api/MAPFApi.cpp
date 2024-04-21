@@ -8,6 +8,15 @@
 #include "PP.h"
 #include "LNS.h"
 
+//pibt related
+#include "simplegrid.h"
+#include "pibt_agent.h"
+#include "problem.h"
+#include "mapf.h"
+#include "pibt.h"
+#include "pps.h"
+#include "winpibt.h"
+
 namespace py = pybind11;
 
 inline auto np_array = []<typename T>(vector<T> *array) {
@@ -65,6 +74,49 @@ void populate_occupancy(const MapGraph &graph, const Solution &solution, const S
 PYBIND11_MODULE(mapf, m) {
     m.doc() = "MAPF module";
     m.def("populate_occupancy", &populate_occupancy);
+    m.def("run_PPS", [](const Problem &problem, Solution &solution, const Config &config) {
+        std::mt19937 rng(config.seed);
+
+        vector<int> agent_order(config.num_agents);
+        std::iota(agent_order.begin(), agent_order.end(), 0);
+        std::shuffle(agent_order.begin(), agent_order.end(), rng);
+
+        SimpleGrid G(config.map_file, &rng);
+        std::vector<Task*> T;
+        PIBT_Agents A;
+        Task::cntId = PIBT_Agent::cntId = Node::cntIndex = PPS::s_uuid = 0; // Need to reset static variables
+        for (int a : agent_order) {
+            // PIBT_Agent and Task will be deallocated in ~MAPF, which inherits from ~PProblem
+            A.push_back(new PIBT_Agent(G.getNode(problem.starts[a].location)));
+            T.push_back(new Task(G.getNode(problem.goal_locations[a].back())));
+        }
+        MAPF P(&G, A, T, &rng);
+
+        PPS solver(&P, &rng);
+        solver.setTimeLimit(config.max_solution_time);
+        bool success = solver.solve();
+        if (success) {
+            solution.paths.resize(A.size());
+            solution.path_costs.resize(A.size());
+            solution.cost = 0;
+            for (int i = 0; i < solution.size(); i++) {
+                int a = agent_order[i];
+                Path &path = solution.paths[a];
+                const auto hist = A[i]->getHist();
+                int t = hist.size() - 1;
+                while (t > 0 && hist[t]->v->getId() == hist[t - 1]->v->getId()) t--;
+                path.resize(t + 1);
+                while (t >= 0) {
+                    path[t] = { hist[t]->v->getId(), t, -1 };
+                    t--;
+                }
+                solution.path_costs[a] = path.size() - 1;
+                solution.cost += solution.path_costs[a];
+            }
+        } else solution.cost = INFINITY;
+        solution.runtime = solver.getElapsed();
+        return success;
+    });
 
     py::class_<Config>(m, "Config")
         .def(py::init<>()) // Constructor

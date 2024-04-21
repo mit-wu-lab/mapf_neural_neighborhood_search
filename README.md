@@ -11,7 +11,7 @@ year={2024}
 ```
 
 ## Installation
-Our C++ MAPF implement is relatively lightweight and does not require dependencies like Boost, Eigen, etc. The only dependency is PyBind11 which is cloned recursively already.
+Our C++ MAPF implementation is relatively lightweight and mostly only depends on PyBind11, which is cloned recursively already. Unfortunately Boost and Eigen are required for the PPS initialization for one case. You can remove everything PIBT and PPS related if you cannot use Boost and Eigen.
 ```
 git clone --recursive https://github.com/mit-wu-lab/mapf_neural_neighborhood_search.git
 cd mapf_neural_neighborhood_search
