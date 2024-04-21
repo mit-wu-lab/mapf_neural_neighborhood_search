@@ -16,6 +16,16 @@ Our C++ MAPF implementation is relatively lightweight and mostly only depends on
 git clone --recursive https://github.com/mit-wu-lab/mapf_neural_neighborhood_search.git
 cd mapf_neural_neighborhood_search
 
+wget https://movingai.com/benchmarks/mapf/mapf-map.zip
+unzip mapf-map.zip -d maps
+rm mapf-map.zip
+
+wget https://movingai.com/benchmarks/mapf/mapf-scen-random.zip
+unzip mapf-scen-random.zip
+rm mapf-scen-random.zip
+mkdir scenarios
+mv scen-random scenarios/random
+
 mkdir build
 cd build
 
