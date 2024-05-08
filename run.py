@@ -217,7 +217,7 @@ run_defaults = Namespace(
     max_init_time=None,
     solver='PBS', # or 'PP'
     occupancy='Array', # or 'IntervalList'
-    wait_at_goal=False,
+    wait_at_goal=True,
 
     reaction_factor=0.01,
     num_subsets=1,

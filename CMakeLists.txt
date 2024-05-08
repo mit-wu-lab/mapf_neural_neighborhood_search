@@ -8,9 +8,6 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 # Find Boost
 find_package(Boost REQUIRED COMPONENTS program_options system filesystem)
 
-# Find Eigen3 for PIBT
-find_package (Eigen3 3.4 REQUIRED NO_MODULE)
-
 if(NOT CMAKE_BUILD_TYPE)
     set(CMAKE_BUILD_TYPE "RELEASE") # other possible values: "DEBUG", "RELWITHDEBINFO", "MINSIZEREL"
 endif()
@@ -23,7 +20,7 @@ include_directories("${CMAKE_SOURCE_DIR}/include" "${CMAKE_SOURCE_DIR}/include/P
 file(GLOB SOURCES "include/*.h" "src/*.cpp" "include/PIBT/*.h" "src/PIBT/*.cpp")
 add_library(mapf_lib SHARED ${SOURCES})
 
-add_subdirectory("${CMAKE_SOURCE_DIR}/lib/pybind11")
+add_subdirectory("${CMAKE_SOURCE_DIR}/include/pybind11")
 
 pybind11_add_module(mapf MODULE python_api/MAPFApi.cpp)
 target_link_libraries(mapf PRIVATE mapf_lib)

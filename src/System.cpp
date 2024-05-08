@@ -33,6 +33,9 @@ void System::advance(const Solution &solution) {
         std::fill(new_edge_occupancy.begin(), new_edge_occupancy.end(), EMPTY_AGENT);
         int new_timestep = timestep + t;
         for (int k = 0; k < config.num_agents; k++) {
+            if (t >= solution.paths[k].size()) {
+                if (!config.wait_at_goal) continue;
+            }
             const State &state = solution.paths[k][min(t, int(solution.paths[k].size()) - 1)];
             const auto [location, _, orientation] = state;
 
