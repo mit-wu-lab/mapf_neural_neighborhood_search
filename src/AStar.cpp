@@ -9,7 +9,8 @@ PathSolution AStar::solve(const State &start, const vector<int> &goal_locations,
         throw invalid_argument(ss.str());
     }
 
-    double start_h_val = G.compute_heuristics(start.location, goal_locations);
+    double lower_bound = config.wait_at_goal ? (occupancy.get_last_constrained_timestep(goal_locations.back()) + 1) : -1;
+    double start_h_val = max(G.compute_heuristics(start.location, goal_locations), lower_bound);
     AStarNode *start_node = new AStarNode(start, 0, start_h_val, nullptr);
     solution.num_generated++;
     if (start_h_val < WEIGHT_MAX) {
@@ -27,7 +28,7 @@ PathSolution AStar::solve(const State &start, const vector<int> &goal_locations,
         if (curr->state.location == goal_locations[curr->goal_index]) {
             curr->goal_index++;
             if (curr->goal_index == goal_locations.size()) {
-                if (config.wait_at_goal && occupancy.is_constrained_after(curr->state.location, curr->state.timestep)) { // Goal is constrained by another agent's future trajectory, keep searching
+                if (config.wait_at_goal && curr->state.timestep < lower_bound) { // Goal is constrained by another agent's future trajectory, keep searching
                     curr->goal_index--;
                 } else {
                     get_solution_path(curr, solution.path);
@@ -43,6 +44,7 @@ PathSolution AStar::solve(const State &start, const vector<int> &goal_locations,
             double next_h_val = G.compute_heuristics(next_state.location, vector(goal_locations.begin() + curr->goal_index, goal_locations.end()));
             if (next_h_val >= WEIGHT_MAX) continue; // This vertex cannot reach the goal vertex
             double next_g_val = curr->g_val + G.get_weight(curr->state.location, next_state.location);
+            next_h_val = max(lower_bound - next_g_val, next_h_val);
 
             auto next = new AStarNode(next_state, next_g_val, next_h_val, curr);
             solution.num_generated++;

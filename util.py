@@ -31,7 +31,6 @@ def build_mapf_config(a, use_lns=None):
     use_lns = use_lns or bool(a.get('num_subset_agents') or a.get('num_subset_agents_fn'))
     config = mapf.LNSConfig() if use_lns else mapf.Config()
     config.map_file = Path(__file__).parent / 'maps' / a.map
-    config.simulation_window = 0 if a.wait_at_goal else a.simulation_window
     config.num_agents = a.num_agents
     config.verbosity = a.verbosity
     config.use_cpp_rng = a.use_cpp_rng
@@ -39,7 +38,6 @@ def build_mapf_config(a, use_lns=None):
     if a.wait_at_goal: assert a.num_windows == 1
     config.max_solution_time = a.max_solution_time
     config.max_path_plan_time = a.max_path_plan_time
-    config.num_preassign_tasks = a.get('num_preassign_tasks', 0)
     a.seed and config.set_seed(a.seed)
     if use_lns:
         config.iterations = np.iinfo(np.int32).max if np.isinf(a.lns_iterations) else a.lns_iterations
